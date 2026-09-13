@@ -5,9 +5,3 @@ venv/
 .venv/
 env/
 
-.vscode/
-
-data/raw/
-data/processed/
-
-models/*.pkl

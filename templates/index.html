@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroIntel // Air Quality & Health Risk Intelligence</title>
+    <meta name="description" content="City-scale air quality prediction and educational health risk intelligence system powered by Machine Learning.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Tailwind CSS (No external CSS file used) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['Outfit', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        dark: {
+                            950: '#06090F',
+                            900: '#0B111E',
+                            850: '#0F172A',
+                            800: '#162035',
+                            700: '#1E293B',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-dark-950 text-slate-100 font-body min-h-screen relative overflow-x-hidden" id="app-body">
+
+    <!-- Ambient Glow Effects -->
+    <div class="fixed inset-0 pointer-events-none z-0">
+        <div class="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:28px_28px] opacity-20"></div>
+        <div class="absolute -top-40 -right-40 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[140px] transition-all duration-700" id="ambient-glow-primary"></div>
+        <div class="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[160px]"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-7 print:hidden">
+
+        <!-- Header: Clean and Rebalanced Without Top-Right Controls -->
+        <header class="flex items-center justify-between pb-6 border-b border-slate-800/80">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-blue-600 p-[1.5px] shadow-[0_0_20px_rgba(245,158,11,0.25)] shrink-0">
+                    <div class="w-full h-full bg-dark-900 rounded-[14px] flex items-center justify-center text-amber-400 text-2xl">
+                        <i class="ph-bold ph-wind"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="font-heading font-extrabold text-2xl tracking-tight text-white">AeroIntel</h1>
+                    <p class="text-xs text-slate-400 font-medium mt-0.5">City-Scale Air Quality & Health Risk Intelligence System</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 text-xs font-mono text-slate-400 bg-dark-900/60 px-3.5 py-1.5 rounded-full border border-slate-800">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Active Telemetry Engine</span>
+            </div>
+        </header>
+
+        <!-- Preset Scenarios Section -->
+        <section class="bg-dark-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-xl">
+            <div class="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-slate-400 mb-3.5">
+                <i class="ph-bold ph-lightning text-amber-400 text-sm"></i>
+                <span>Preset Scenarios</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 w-full" id="preset-pills">
+                {% for preset in presets %}
+                <button type="button"
+                        class="preset-pill group w-full text-left p-3.5 rounded-xl bg-dark-800/50 hover:bg-dark-700/70 border border-slate-700/50 text-slate-300 hover:text-white transition-all duration-200 flex flex-col justify-between gap-2 {% if preset.activeClass %}{{ preset.activeClass }}{% endif %}"
+                        data-preset-id="{{ preset.id }}"
+                        data-tag-color="{{ preset.tagColor }}">
+                    <div class="flex items-center justify-between gap-1.5 w-full">
+                        <span class="inline-flex items-center gap-1.5 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full border {{ preset.tagClass }}">
+                            <span class="w-1.5 h-1.5 rounded-full shrink-0 {{ preset.dotClass }}"></span>
+                            <span>{{ preset.tag }}</span>
+                        </span>
+                    </div>
+                    <div class="text-xs font-semibold text-slate-200 group-hover:text-white leading-snug">
+                        {{ preset.title }}
+                    </div>
+                </button>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Main Workspace Grid: Stretched for Equal Vertical Baseline -->
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+
+            <!-- Left Column: Pollutant Input Matrix -->
+            <section class="lg:col-span-7 bg-dark-900/60 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col justify-between h-full">
+                
+                <div class="flex flex-col gap-6">
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-800/70">
+                        <div>
+                            <h2 class="font-heading font-bold text-lg text-white flex items-center gap-2.5">
+                                <i class="ph-bold ph-faders text-amber-400 text-xl"></i> Atmospheric Pollutant Telemetry
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-1">Adjust chemical concentrations to observe immediate model predictions</p>
+                        </div>
+                        <span class="text-[11px] font-mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full flex items-center gap-2 shrink-0">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Live Sync
+                        </span>
+                    </div>
+
+                    <form id="aqi-form" class="flex flex-col gap-6">
+
+                        <!-- Group 1: Particulate Matter -->
+                        <div class="flex flex-col gap-3">
+                            <div class="text-xs font-mono font-medium text-slate-400 pb-1.5 border-b border-slate-800/50 flex items-center justify-between">
+                                <span class="flex items-center gap-2 text-slate-300">
+                                    <i class="ph-bold ph-grains text-amber-400"></i> Particulate Matter
+                                </span>
+                                <span class="text-[10px] text-slate-500">Inhalable Aerosols</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {% for p in pollutants if p.group == 'Particulate Matter' %}
+                                <div class="pollutant-card group bg-dark-950/40 hover:bg-dark-950/70 border border-slate-800/60 hover:border-slate-700/80 rounded-2xl p-4 transition-all duration-200" data-key="{{ p.key }}">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label for="num-{{ p.key }}" class="cursor-pointer">
+                                            <span class="font-heading font-extrabold text-lg text-white tracking-wide">{{ p.key }}</span>
+                                            <span class="text-xs text-slate-500 font-mono ml-1.5">({{ p.unit }})</span>
+                                        </label>
+                                        <input type="number"
+                                               id="num-{{ p.key }}"
+                                               name="{{ p.key }}"
+                                               min="{{ p.min }}"
+                                               max="{{ p.max }}"
+                                               step="{{ p.step }}"
+                                               value="{{ p.default }}"
+                                               class="pollutant-number-input w-20 bg-dark-900/90 border border-slate-700/70 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-2.5 py-1.5 text-right font-mono font-bold text-sm text-white outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition">
+                                    </div>
+                                    <div class="my-3">
+                                        <input type="range"
+                                               id="slider-{{ p.key }}"
+                                               min="{{ p.min }}"
+                                               max="{{ p.max }}"
+                                               step="{{ p.step }}"
+                                               value="{{ p.default }}"
+                                               class="pollutant-slider w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400 hover:accent-amber-300"
+                                               data-for="{{ p.key }}">
+                                    </div>
+                                    <div class="text-xs text-slate-400 mt-1 leading-tight">{{ p.name }}</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Group 2: Nitrogen Oxides -->
+                        <div class="flex flex-col gap-3">
+                            <div class="text-xs font-mono font-medium text-slate-400 pb-1.5 border-b border-slate-800/50 flex items-center justify-between">
+                                <span class="flex items-center gap-2 text-slate-300">
+                                    <i class="ph-bold ph-gas-can text-sky-400"></i> Nitrogen Oxides
+                                </span>
+                                <span class="text-[10px] text-slate-500">Combustion Derivatives</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                                {% for p in pollutants if p.group == 'Nitrogen Oxides' %}
+                                <div class="pollutant-card group bg-dark-950/40 hover:bg-dark-950/70 border border-slate-800/60 hover:border-slate-700/80 rounded-2xl p-4 transition-all duration-200" data-key="{{ p.key }}">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label for="num-{{ p.key }}" class="cursor-pointer">
+                                            <span class="font-heading font-extrabold text-base text-white tracking-wide">{{ p.key }}</span>
+                                            <span class="text-xs text-slate-500 font-mono ml-1">({{ p.unit }})</span>
+                                        </label>
+                                        <input type="number"
+                                               id="num-{{ p.key }}"
+                                               name="{{ p.key }}"
+                                               min="{{ p.min }}"
+                                               max="{{ p.max }}"
+                                               step="{{ p.step }}"
+                                               value="{{ p.default }}"
+                                               class="pollutant-number-input w-16 bg-dark-900/90 border border-slate-700/70 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-2 py-1.5 text-right font-mono font-bold text-xs text-white outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition">
+                                    </div>
+                                    <div class="my-3">
+                                        <input type="range"
+                                               id="slider-{{ p.key }}"
+                                               min="{{ p.min }}"
+                                               max="{{ p.max }}"
+                                               step="{{ p.step }}"
+                                               value="{{ p.default }}"
+                                               class="pollutant-slider w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400 hover:accent-amber-300"
+                                               data-for="{{ p.key }}">
+                                    </div>
+                                    <div class="text-xs text-slate-400 mt-1 leading-tight">{{ p.name }}</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Group 3: Carbon, Sulfur & Secondary -->
+                        <div class="flex flex-col gap-3">
+                            <div class="text-xs font-mono font-medium text-slate-400 pb-1.5 border-b border-slate-800/50 flex items-center justify-between">
+                                <span class="flex items-center gap-2 text-slate-300">
+                                    <i class="ph-bold ph-atom text-purple-400"></i> Carbon, Sulfur & Secondary
+                                </span>
+                                <span class="text-[10px] text-slate-500">Photochemical & Industrial</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {% for p in pollutants if p.group in ['Carbon & Sulfur', 'Secondary Pollutants'] %}
+                                <div class="pollutant-card group bg-dark-950/40 hover:bg-dark-950/70 border border-slate-800/60 hover:border-slate-700/80 rounded-2xl p-4 transition-all duration-200" data-key="{{ p.key }}">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label for="num-{{ p.key }}" class="cursor-pointer">
+                                            <span class="font-heading font-extrabold text-lg text-white tracking-wide">{{ p.key }}</span>
+                                            <span class="text-xs text-slate-500 font-mono ml-1.5">({{ p.unit }})</span>
+                                        </label>
+                                        <input type="number"
+                                               id="num-{{ p.key }}"
+                                               name="{{ p.key }}"
+                                               min="{{ p.min }}"
+                                               max="{{ p.max }}"
+                                               step="{{ p.step }}"
+                                               value="{{ p.default }}"
+                                               class="pollutant-number-input w-20 bg-dark-900/90 border border-slate-700/70 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-2.5 py-1.5 text-right font-mono font-bold text-sm text-white outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition">
+                                    </div>
+                                    <div class="my-3">
+                                        <input type="range"
+                                               id="slider-{{ p.key }}"
+                                               min="{{ p.min }}"
+                                               max="{{ p.max }}"
+                                               step="{{ p.step }}"
+                                               value="{{ p.default }}"
+                                               class="pollutant-slider w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400 hover:accent-amber-300"
+                                               data-for="{{ p.key }}">
+                                    </div>
+                                    <div class="text-xs text-slate-400 mt-1 leading-tight">{{ p.name }}</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Group 4: Volatile Organic Compounds -->
+                        <div class="flex flex-col gap-3">
+                            <div class="text-xs font-mono font-medium text-slate-400 pb-1.5 border-b border-slate-800/50 flex items-center justify-between">
+                                <span class="flex items-center gap-2 text-slate-300">
+                                    <i class="ph-bold ph-flask text-emerald-400"></i> Volatile Organics (VOCs)
+                                </span>
+                                <span class="text-[10px] text-slate-500">Aromatic Hydrocarbons</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {% for p in pollutants if p.group == 'Volatile Organics' %}
+                                <div class="pollutant-card group bg-dark-950/40 hover:bg-dark-950/70 border border-slate-800/60 hover:border-slate-700/80 rounded-2xl p-4 transition-all duration-200" data-key="{{ p.key }}">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label for="num-{{ p.key }}" class="cursor-pointer">
+                                            <span class="font-heading font-extrabold text-lg text-white tracking-wide">{{ p.key }}</span>
+                                            <span class="text-xs text-slate-500 font-mono ml-1.5">({{ p.unit }})</span>
+                                        </label>
+                                        <input type="number"
+                                               id="num-{{ p.key }}"
+                                               name="{{ p.key }}"
+                                               min="{{ p.min }}"
+                                               max="{{ p.max }}"
+                                               step="{{ p.step }}"
+                                               value="{{ p.default }}"
+                                               class="pollutant-number-input w-20 bg-dark-900/90 border border-slate-700/70 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-2.5 py-1.5 text-right font-mono font-bold text-sm text-white outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition">
+                                    </div>
+                                    <div class="my-3">
+                                        <input type="range"
+                                               id="slider-{{ p.key }}"
+                                               min="{{ p.min }}"
+                                               max="{{ p.max }}"
+                                               step="{{ p.step }}"
+                                               value="{{ p.default }}"
+                                               class="pollutant-slider w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400 hover:accent-amber-300"
+                                               data-for="{{ p.key }}">
+                                    </div>
+                                    <div class="text-xs text-slate-400 mt-1 leading-tight">{{ p.name }}</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- Grounding Telemetry Bar (Aligned Horizontally With Right Panel Bottom) -->
+                <div class="mt-8 pt-4 border-t border-slate-800/70 flex items-center justify-between text-xs text-slate-400 font-mono">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>Continuous Telemetry Sync Active</span>
+                    </div>
+                    <button type="button" id="btn-manual-sync" class="px-2.5 py-1 rounded-lg bg-dark-800/80 hover:bg-dark-700 border border-slate-700/60 hover:border-amber-500/50 text-amber-400 hover:text-amber-300 font-semibold transition active:scale-95 flex items-center gap-1.5 shadow-sm">
+                        <i class="ph-bold ph-arrows-clockwise text-xs"></i>
+                        <span>Force Refresh</span>
+                    </button>
+                </div>
+
+            </section>
+
+            <!-- Right Column: Single Unified Assessment Console -->
+            <section class="lg:col-span-5 bg-dark-900/60 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col justify-between h-full" id="result-panel">
+
+                <div class="flex flex-col gap-6">
+
+                    <!-- Panel Header -->
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-800/70">
+                        <h2 class="font-heading font-bold text-lg text-white flex items-center gap-2.5">
+                            <i class="ph-bold ph-gauge text-amber-400 text-xl"></i> Air Quality Assessment
+                        </h2>
+                        <span class="text-[10px] font-mono tracking-wider font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> LIVE HUD
+                        </span>
+                    </div>
+
+                    <!-- Gauge Section -->
+                    <div class="flex flex-col items-center py-2">
+                        <div class="relative w-48 h-48 my-1 flex items-center justify-center">
+                            <svg class="w-full h-full -rotate-90" viewBox="0 0 200 200">
+                                <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(255, 255, 255, 0.04)" stroke-width="14"></circle>
+                                <circle id="gauge-progress-circle"
+                                        cx="100" cy="100" r="82"
+                                        fill="none"
+                                        stroke="#F59E0B"
+                                        stroke-width="14"
+                                        stroke-linecap="round"
+                                        stroke-dasharray="515.22"
+                                        stroke-dashoffset="250">
+                                </circle>
+                            </svg>
+
+                            <div class="absolute inset-0 flex flex-col items-center justify-center text-center select-none">
+                                <span class="text-[10px] font-mono font-bold tracking-widest text-slate-400 uppercase">Predicted AQI</span>
+                                <span class="font-heading font-black text-5xl tracking-tight text-white my-0.5" id="aqi-score">--</span>
+                                <span class="text-[11px] font-mono text-slate-500">Scale: 0 — 500</span>
+                            </div>
+                        </div>
+
+                        <!-- Category Status Banner -->
+                        <div id="category-banner" class="w-full mt-4 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3.5 transition-all duration-300">
+                            <div id="category-icon" class="w-11 h-11 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl shrink-0">
+                                <i class="ph-bold ph-shield-warning"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <span id="category-name" class="font-heading font-extrabold text-lg text-amber-400 leading-tight block">Moderate</span>
+                                <span id="category-summary" class="text-xs text-slate-300 font-medium leading-snug mt-0.5 block">Breathing Discomfort to Sensitive Groups</span>
+                            </div>
+                        </div>
+
+                        <!-- Primary Driver Pill -->
+                        <div class="w-full mt-3 px-4 py-2.5 rounded-xl bg-dark-950/60 border border-slate-800/80 text-xs text-slate-300 flex items-center justify-between font-mono">
+                            <span class="text-slate-400 flex items-center gap-2">
+                                <i class="ph-fill ph-warning-circle text-amber-400 text-sm"></i> Primary Driver:
+                            </span>
+                            <span class="font-bold text-white"><span id="dominant-pollutant-name" class="text-amber-400">PM2.5</span> (Highest Sub-index)</span>
+                        </div>
+                    </div>
+
+                    <!-- Health Risk Guidance -->
+                    <div class="flex flex-col gap-3.5">
+                        <div class="flex items-center justify-between text-xs font-mono uppercase tracking-wider text-slate-400 pb-1 border-b border-slate-800/60">
+                            <span class="flex items-center gap-2 text-slate-300 font-bold">
+                                <i class="ph-bold ph-heartbeat text-rose-400"></i> Health Guidance
+                            </span>
+                            <span class="text-slate-500 text-[11px]">Educational Risk</span>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-dark-950/40 border border-slate-800/70 flex flex-col gap-3">
+                            <div>
+                                <span class="text-xs font-semibold text-slate-300 flex items-center gap-1.5 mb-1">
+                                    <i class="ph-bold ph-users text-amber-400"></i> General Public
+                                </span>
+                                <p class="text-xs text-slate-300 leading-relaxed font-normal" id="health-advisory-text">
+                                    Analyzing atmospheric hazards...
+                                </p>
+                            </div>
+                            <div class="pt-2.5 border-t border-slate-800/50">
+                                <span class="text-xs font-semibold text-rose-300 flex items-center gap-1.5 mb-1">
+                                    <i class="ph-bold ph-first-aid text-rose-400"></i> Sensitive Demographic Alert
+                                </span>
+                                <p class="text-xs text-rose-200/90 leading-relaxed font-normal" id="sensitive-advisory-text">
+                                    Children, elderly, and respiratory patients should reduce strenuous outdoor workouts.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Sub-index Severity Ranking (Retained on Right Side) -->
+                        <div class="flex flex-col gap-2 mt-1">
+                            <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                                <span>Sub-Index Severity Ranking</span>
+                                <span class="text-slate-500">CPCB Values</span>
+                            </div>
+                            <div id="breakdown-bars" class="flex flex-col gap-1.5"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Bottom Section: Executive Report Export & Attribution -->
+                <div class="mt-8 pt-4 border-t border-slate-800/70 flex flex-col gap-3.5">
+                    <div class="flex items-center justify-between text-xs font-mono uppercase tracking-wider text-slate-400">
+                        <span class="flex items-center gap-2 text-white font-bold">
+                            <i class="ph-bold ph-file-text text-amber-400"></i> Executive Report Export
+                        </span>
+                        <span class="text-[11px] text-emerald-400 font-mono font-medium flex items-center gap-1">
+                            <i class="ph-fill ph-check-circle"></i> Ready
+                        </span>
+                    </div>
+
+                    <button type="button" id="btn-download-pdf" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-blue-600 hover:from-amber-400 hover:to-blue-500 text-white font-heading font-bold text-sm flex items-center justify-center gap-2.5 shadow-[0_0_25px_rgba(245,158,11,0.2)] hover:shadow-[0_0_35px_rgba(245,158,11,0.35)] transition-all duration-300 active:scale-[0.99]">
+                        <i class="ph-bold ph-file-pdf text-lg"></i>
+                        <span>Download Executive Report (PDF / Print)</span>
+                    </button>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" id="btn-download-json" class="py-2.5 px-3 rounded-xl bg-dark-950/80 hover:bg-slate-800/90 border border-slate-700/70 text-xs font-semibold text-slate-200 hover:text-white flex items-center justify-center gap-2 transition shadow-sm">
+                            <i class="ph ph-code"></i>
+                            <span>Export JSON</span>
+                        </button>
+                        <button type="button" id="btn-copy-summary" class="py-2.5 px-3 rounded-xl bg-dark-950/80 hover:bg-slate-800/90 border border-slate-700/70 text-xs font-semibold text-slate-200 hover:text-white flex items-center justify-center gap-2 transition shadow-sm">
+                            <i class="ph ph-copy"></i>
+                            <span>Copy Summary</span>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center justify-between text-[11px] text-slate-500 font-mono pt-1">
+                        <span>Engine: Random Forest ML</span>
+                        <span>Standard: CPCB NAQI</span>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="text-center text-xs text-slate-500 font-mono py-4 border-t border-slate-800/80 mt-2">
+            AeroIntel • City-Scale Air Quality & Health Risk Intelligence System • Real-Time Machine Learning Pipeline
+        </footer>
+
+    </div>
+
+    <!-- Hidden Printable Report Layout (Rendered only on Print/PDF) -->
+    <div id="printable-report" class="hidden print:block p-8 bg-white text-black font-sans">
+        <div class="border-b-2 border-black pb-4 mb-6">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-3xl font-black uppercase tracking-tight">AeroIntel Executive Report</h1>
+                    <p class="text-sm text-gray-600 mt-1">Air Quality & Health Risk Intelligence Assessment</p>
+                </div>
+                <div class="text-right text-xs text-gray-500">
+                    <p>Generated: <span id="print-timestamp"></span></p>
+                    <p>Engine: Random Forest Regressor (ML)</p>
+                    <p>Standard: CPCB NAQI</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-100 p-6 rounded-lg border border-gray-300 mb-6 flex justify-between items-center">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Predicted Air Quality Index</span>
+                <div class="text-5xl font-black mt-1" id="print-aqi-score">--</div>
+                <div class="text-lg font-bold uppercase mt-1" id="print-category">--</div>
+            </div>
+            <div class="text-right max-w-xs">
+                <span class="text-xs font-bold uppercase text-gray-500">Primary Environmental Driver</span>
+                <div class="text-xl font-bold text-gray-900" id="print-dominant-pollutant">--</div>
+                <p class="text-xs text-gray-600 mt-1" id="print-summary">--</p>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-base font-bold uppercase tracking-wider border-b border-gray-300 pb-1 mb-3">Pollutant Concentrations & Sub-Indices</h2>
+            <table class="w-full text-xs border-collapse">
+                <thead>
+                    <tr class="bg-gray-200 text-left">
+                        <th class="p-2 border border-gray-300">Pollutant</th>
+                        <th class="p-2 border border-gray-300">Measured Concentration</th>
+                        <th class="p-2 border border-gray-300">Unit</th>
+                        <th class="p-2 border border-gray-300">Computed Sub-Index</th>
+                    </tr>
+                </thead>
+                <tbody id="print-pollutant-table"></tbody>
+            </table>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-base font-bold uppercase tracking-wider border-b border-gray-300 pb-1 mb-3">Official Health Risk Advisories</h2>
+            <div class="mb-3">
+                <h3 class="text-xs font-bold text-gray-800 uppercase">General Population:</h3>
+                <p class="text-xs text-gray-700 mt-0.5" id="print-health-advisory"></p>
+            </div>
+            <div>
+                <h3 class="text-xs font-bold text-gray-800 uppercase">Sensitive Groups (Children, Elderly, Respiratory):</h3>
+                <p class="text-xs text-gray-700 mt-0.5" id="print-sensitive-advisory"></p>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-300 pt-4 text-[10px] text-gray-500 text-center">
+            AeroIntel Intelligent Environmental Analytics • Generated under Central Pollution Control Board (CPCB) Guidelines
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

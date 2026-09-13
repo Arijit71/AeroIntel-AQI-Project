@@ -24,7 +24,8 @@ def main():
     pd.set_option("display.max_columns", None)
 
     print("\nCleaned data:\n",df.head(10))
-    print(df.dtypes)
+    import os
+    os.makedirs("data/processed", exist_ok=True)
     df.to_csv("data/processed/cleaned_city_day.csv", index=False)
 
     analyze(df)
