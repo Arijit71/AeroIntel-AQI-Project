@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Brand border gradient: Amber (#F59E0B) -> Orange (#F97316) -> Sky (#38BDF8) -->
+    <linearGradient id="brand-border" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="50%" stop-color="#F97316"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Dark Obsidian Container with Gradient Border -->
+  <rect x="28" y="28" width="456" height="456" rx="124" ry="124" fill="#0B0E17" stroke="url(#brand-border)" stroke-width="26"/>
+
+  <!-- Phosphor Wind Bold Path in Warm Golden Amber -->
+  <g transform="translate(108.8, 108.8) scale(1.15)">
+    <path fill="#FBBF24" d="M24 104a12 12 0 0 1 0-24h96a12 12 0 0 0 0-24a15.07 15.07 0 0 0-10.26 4.45a12 12 0 0 1-17-16.9A39.34 39.34 0 0 1 120 32a36 36 0 0 1 0 72Zm184-36a39.34 39.34 0 0 0-27.3 11.55a12 12 0 0 0 17 16.9A15.07 15.07 0 0 1 208 92a12 12 0 0 1 0 24H32a12 12 0 0 0 0 24h176a36 36 0 0 0 0-72m-56 84H40a12 12 0 0 0 0 24h112a12 12 0 0 1 0 24a15.1 15.1 0 0 1-10.27-4.45a12 12 0 1 0-17 16.9A39.34 39.34 0 0 0 152 224a36 36 0 0 0 0-72"/>
+  </g>
+</svg>

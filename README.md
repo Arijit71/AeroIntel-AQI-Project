@@ -1,146 +1,224 @@
-1. Introduction
+# AeroIntel — Urban Air Quality & Health Risk Intelligence Platform
 
-Air pollution is one of the major environmental challenges faced by rapidly developing cities. Air quality can vary significantly from one neighborhood to another because of factors such as traffic, industrial activities, construction, weather conditions, and local environmental conditions. A single AQI value for an entire city may therefore fail to represent the actual pollution conditions experienced by people in different areas.
+AeroIntel is an intelligent air quality monitoring, prediction, and source-attribution platform built for Indian urban airsheds.
 
-The City-Scale Air Quality & Health Risk Intelligence System is a machine-learning-based system designed to provide more detailed air-quality intelligence at the neighborhood level. The system uses air pollutants such as PM2.5, PM10, NO₂, SO₂, CO and O₃ along with meteorological and contextual information such as temperature, humidity, wind speed, wind direction, traffic volume, weather conditions and historical AQI.
+Instead of displaying a single generic AQI number for an entire city, AeroIntel provides neighborhood-level air quality intelligence. It evaluates 11 criteria pollutants against official Central Pollution Control Board (CPCB) NAQI standards, tracks real-time wind vectors, maps nearby stationary emission sources (industrial zones, landfills, vehicular corridors), calculates whether plumes are blowing toward you, and predicts health risks for the public and sensitive groups.
 
-The proposed system aims to predict future air-quality conditions for different locations, identify possible pollution sources, and estimate an educational health-risk indicator based on pollution, exposure and person category. It can help users understand where pollution is high, why it may be high, what conditions may occur in the future, and which groups may require greater protection.
+---
 
+## Quick Setup Guide
 
-2. Problem Statement
+Follow these steps to get the entire system running on your computer.
 
-Traditional air-quality monitoring systems generally provide pollution information for a city or a limited number of monitoring stations. Such information may not accurately represent pollution levels in individual neighborhoods because pollution varies according to traffic, industrial activity, construction, weather and other local factors.
+### Step 1: Set Up Your `.env` File (First & Most Important)
 
-For example, one neighborhood may experience high pollution because of heavy traffic, while another may be affected primarily by industrial activity or construction. The uploaded project concept specifically aims to move beyond simply stating that a city's air quality is poor and instead determine which neighborhoods are most polluted, why they are polluted, who may be at risk, what may happen in the future, and what actions could potentially reduce pollution.
+The application relies on an environment file named `.env` in the root folder of the project to store server settings, login credentials, and optional API keys.
 
-Therefore, the solution is to develop a machine-learning-based system that can:
+1. In the project root folder, find the file named `.env.example`.
+2. Make a copy of it and name the new file `.env` (make sure it starts with a dot).
+   - On Windows (PowerShell):
+     ```powershell
+     Copy-Item .env.example .env
+     ```
+   - On Mac / Linux:
+     ```bash
+     cp .env.example .env
+     ```
+3. Open `.env` in any text editor. The defaults work out of the box:
 
-Predict air-quality conditions at the neighborhood level.
-Use historical, environmental and contextual data to improve predictions.
-Identify possible contributors to pollution using multiple data sources.
-Estimate health-risk indicators for different categories of people.
-Provide useful information for individuals and local authorities.
+   ```env
+   SECRET_KEY=aero-intel-secret-key-prod-9831478201
+   PORT=5000
+   AUTH_ENABLED=true
+   ADMIN_USERNAME=admin
+   ADMIN_PASSWORD=admin123
+   API_ACCESS_TOKEN=aero-intel-token-2026
+   WAQI_API_KEY=
+   ```
 
+   > Default login is **admin** / **admin123**. `WAQI_API_KEY` is completely optional (the app automatically uses Open-Meteo and regional CPCB baselines if left blank).
 
-3. Objectives
+---
 
-The major objectives of the project are:
+### Step 2: Install Dependencies
 
-1. Neighborhood-level air-quality prediction
+Make sure you have **Python 3.9 or higher** installed.
 
-To develop a machine-learning model capable of predicting air-quality conditions for different neighborhoods rather than providing only a single city-wide prediction.
+1. Open your terminal or command prompt in the `AQI_Project` folder.
+2. (Recommended) Create and activate a clean virtual environment:
+   - **Windows**:
+     ```powershell
+     python -m venv venv
+     .\venv\Scripts\activate
+     ```
+   - **Mac / Linux**:
+     ```bash
+     python3 -m venv venv
+     source venv/bin/activate
+     ```
+3. Install the required Python packages:
+   ```bash
+   pip install -r Requirements.txt
+   ```
 
-2. Use multiple environmental factors
+---
 
-To utilize pollutant, weather, traffic and historical air-quality data to improve the prediction process.
-
-3. Future pollution prediction
-
-To predict upcoming air-quality conditions so that people and authorities can take preventive measures.
-
-4. Pollution-source identification
-
-To analyze multiple data sources such as traffic, weather, industrial activity and pollution measurements to estimate possible contributors to pollution.
-
-5. Health-risk estimation
-
-To develop an educational risk indicator that combines air quality, exposure and person category to estimate relative health risk.
-
-6. Support decision-making
-
-To provide useful pollution-related information that can assist citizens and local authorities in understanding pollution patterns and considering protective or preventive actions.
-
-7. Explore intervention impact
-
-To explore the potential impact of pollution-control interventions using analytical/causal methods, as proposed in the project concept.
-
-
-4. Existing System
-
-Existing air-quality monitoring systems primarily depend on pollution-monitoring stations and provide information such as current AQI, pollutant concentrations and general air-quality categories.
-
-A typical system may provide information such as:
-
-Kolkata AQI = 90
-
-However, this approach has several limitations.
-
-Limitations of the Existing System
-
-1. City-level information
-
-The same AQI value may be presented for a large geographical area even though pollution levels can vary considerably between neighborhoods.
-
-2. Limited prediction capability
-
-Many basic systems focus primarily on current or historical air-quality information rather than predicting future conditions.
-
-3. Limited pollution-source analysis
-
-A basic AQI system may tell users how polluted an area is without explaining the possible contributors to that pollution.
-
-4. No personalized risk indication
-
-Different people may have different levels of exposure and vulnerability. Children, elderly people, outdoor workers and people who exercise outdoors may experience different levels of exposure.
-
-5. Limited decision support
-
-Traditional systems generally do not combine pollution, weather, traffic and exposure information into a unified intelligence system.
-
-Therefore, there is a need for a more comprehensive ML-based approach.
-
-5. Proposed System
-
-The proposed City-Scale Air Quality & Health Risk Intelligence System uses machine learning and multiple data sources to create a more detailed air-quality prediction system.
-
-The system will collect and preprocess data related to:
-
-PM2.5
-PM10
-NO₂
-SO₂
-CO
-O₃
-Temperature
-Humidity
-Wind speed
-Wind direction
-Traffic volume
-Weather conditions
-Historical AQI
-
-These variables will be processed and supplied to machine-learning models for predicting air-quality conditions at different locations.
-
-Main components of the proposed system
-
-1. Data Collection
-
-Collect historical air-quality, weather, traffic and location-related data.
-
-2. Data Preprocessing
-
-Handle missing values, incorrect values, duplicates and outliers and prepare the dataset for machine learning.
-
-3. Exploratory Data Analysis
-
-Analyze relationships between pollutants, weather conditions, traffic and air quality.
-
-4. Feature Engineering
-
-Create useful features from the available environmental and historical data.
-
-5. Machine Learning
-
-Train and evaluate appropriate ML models to predict air-quality conditions.
-
-6. Pollution Source Analysis
-
-Analyze relationships between pollution and factors such as traffic, industrial activity, construction and weather. The project document notes that source percentages should be treated as model estimates rather than automatically proven facts.
-
-7. Health Risk Indicator
-
-Combine pollution level, exposure and person category to produce an educational risk score rather than a medical diagnosis.
-
-8. Decision Support
-
-Provide predictions and insights that can help users understand pollution conditions and take appropriate protective actions.
+### Step 3: Start the Web Dashboard
+
+Run the main web server:
+
+```bash
+python app.py
+```
+
+You should see output similar to:
+```
+* Starting AQI Web Application on http://127.0.0.1:5000
+* Serving Flask app 'app'
+* Running on http://127.0.0.1:5000
+```
+
+---
+
+### Step 4: Open in Your Browser & Log In
+
+1. Open your web browser (Chrome, Edge, Firefox, Brave, Safari) and navigate to:
+   ```
+   http://127.0.0.1:5000
+   ```
+2. You will be greeted by the **AeroIntel Access Gateway** login screen.
+3. Enter the default operator credentials (from your `.env` file):
+   - **Username**: `admin`
+   - **Password**: `admin123`
+4. Click **Authenticate & Enter System**. You are now in the live operational dashboard!
+
+---
+
+## How to Use the Dashboard
+
+Once logged in, everything is interactive and updates in real time:
+
+- **Location Dropdown & GPS**:
+  - Select any metropolitan city from the top bar (Mumbai, Delhi NCR, Bengaluru, Kolkata, Chennai, Hyderabad, Ahmedabad, Lucknow).
+  - Or click the **GPS** button. The browser will ask for location permission; once allowed, it detects your device coordinates, resolves your exact locality (e.g. *Shrirampur*, *Bandra*, *Noida*), and centers the radar map directly over your position.
+
+- **Sync Station**:
+  - Click **Sync Station** to fetch the latest real-time pollutant measurements and live wind data for your selected location.
+
+- **Chemical Telemetry Matrix**:
+  - The left grid displays 11 criteria pollutants with live values: `PM2.5`, `PM10`, `NO2`, `NO`, `NOx`, `CO`, `SO2`, `O3`, `NH3`, `Benzene`, and `Toluene`.
+  - Move any range slider or type numbers directly into the boxes. The machine learning model recalculates the AQI immediately, and the status switches to an amber **Manual** mode so you can simulate "what-if" environmental scenarios.
+  - Click **Sync Station** or pick a city at any time to restore genuine live station data.
+
+- **Air Quality Assessment & CPCB Gauge**:
+  - Displays the predicted AQI on the official CPCB 0–500 scale with dynamic color grading (Good, Satisfactory, Moderate, Poor, Very Poor, Severe).
+  - Highlights the **Primary Threat Pollutant** and the **Foremost Emission Source**.
+  - Provides tailored health guidance for the general public and sensitive groups (children, elderly, respiratory patients).
+
+- **Atmospheric Source Attribution**:
+  - Shows estimated percentage contributions by emission source: Vehicular Traffic, Industrial Fuel Combustion, Landfill & Waste Burning, Dust & Construction, and Secondary Atmospheric Reactions.
+  - Lists actionable source intervention strategies.
+
+- **Airshed Geographic Radar (Leaflet Map)**:
+  - An interactive dark-themed map scanning a 35 km perimeter around you.
+  - Drops color-coded pins on verified industrial clusters, thermal power stations, refineries, waste dumping grounds, and traffic corridors.
+  - Compares the facility's bearing against the live wind direction to report whether it is currently **Downwind** (blowing toward you), **Crosswind**, or **Upwind**.
+  - Click any point source card below the map to zoom in and inspect its telemetry.
+
+- **Enlarge Map (Tactical View)**:
+  - Click the expand icon on the top-left of the radar map canvas to pop open a fullscreen tactical radar view with background blur. Press `Esc` or click the minimize button to close.
+
+- **Download Executive Report (PDF / Print)**:
+  - Click **Download Executive Report** at the bottom of the Air Quality Assessment card. This produces a clean, high-contrast black-and-white printable executive report with complete pollutant tables, source breakdowns, and health advisories.
+
+---
+
+## Useful Commands & Extra Features
+
+### 1. Run the Automated Test Suite
+To verify that all endpoints, DOM IDs, authentication flows, and calculation engines are working properly:
+```bash
+python -m unittest discover tests
+```
+All 17 unit and integration tests should pass in under 2 seconds.
+
+### 2. Retrain the Machine Learning Model
+If you add new training rows to `data/processed/cleaned_city_day.csv` or want to retrain the Random Forest model from scratch:
+```bash
+python main.py
+```
+This runs the full data pipeline: data loading, cleaning, feature engineering, training a 100-tree Random Forest regressor, evaluating metrics (R², RMSE, MAE), generating diagnostic charts, and saving updated `.pkl` model artifacts to the `models/` directory.
+
+### 3. Run the Streamlit Interface (Alternative UI)
+AeroIntel also includes an alternative Streamlit dashboard:
+```bash
+streamlit run streamlit_app.py
+```
+This opens a clean analytical interface on `http://localhost:8501`.
+
+---
+
+## Project Structure
+
+```
+AQI_Project/
+├── .env                     # Your active configuration and credentials (not committed to git)
+├── .env.example             # Template file showing all configuration options
+├── .gitignore               # Ignored files (virtual environment, cache, .env)
+├── Requirements.txt         # Python library dependencies
+├── README.md                # Project documentation and user guide
+├── app.py                   # Main Flask backend application & REST API
+├── main.py                  # End-to-end ML training and evaluation script
+├── streamlit_app.py         # Streamlit alternative interface
+│
+├── data/
+│   ├── raw/                 # Original air quality datasets
+│   └── processed/           # Cleaned and processed dataset (cleaned_city_day.csv)
+│
+├── models/
+│   ├── random_forest_model.pkl   # Trained Random Forest regressor
+│   ├── scaler.pkl                # Fitted feature scaler
+│   └── imputer.pkl               # Fitted missing-value imputer
+│
+├── src/
+│   ├── data_loader.py            # Loads raw CSV data
+│   ├── preprocessing.py          # Data cleaning and missing value handling
+│   ├── feature_engineering.py    # Temporal and chemical feature generation
+│   ├── model_training.py         # Model training routines
+│   ├── evaluation.py             # Evaluation metrics (R2, RMSE, MAE)
+│   ├── model_saving.py           # Model artifact serialization
+│   ├── predict.py                # Prediction inference & CPCB sub-index engine
+│   ├── source_identification.py  # Chemical fingerprinting & source attribution
+│   ├── nearby_sources.py         # Point-source database & plume vector analysis
+│   ├── realtime_api.py           # Live WAQI & Open-Meteo telemetry fetcher
+│   ├── analysis.py               # Statistical and exploratory data analysis
+│   └── visualization.py          # Chart generation utilities
+│
+├── static/
+│   ├── js/app.js                 # Frontend interactive logic (Leaflet, sliders, GPS)
+│   └── images/                   # Training evaluation and correlation plots
+│
+├── templates/
+│   ├── index.html                # Main AeroIntel operational dashboard
+│   └── login.html                # Operator access gateway login page
+│
+└── tests/
+    ├── test_dom_elements.py      # DOM ID and UI structure verification tests
+    └── test_new_features.py      # End-to-end API, auth, modal, and geocode tests
+```
+
+---
+
+## Frequently Asked Questions
+
+**Q: Do I need a paid API key to use AeroIntel?**  
+No. AeroIntel is fully functional out of the box without any paid keys. It automatically pairs open-access weather feeds with verified CPCB regional baselines.
+
+**Q: Why does the dashboard say "Mode: Manual"?**  
+Whenever you move a slider or change an input in the Chemical Telemetry Matrix, the system switches to manual simulation mode so you know you are viewing what-if test values rather than live station readings. Clicking **Sync Station** restores live data.
+
+**Q: How do I change my login password?**  
+Open your `.env` file, change `ADMIN_PASSWORD=your_new_password`, and restart `python app.py`.
+
+**Q: Can I turn off the login screen during local development?**  
+Yes. In `.env`, set `AUTH_ENABLED=false` and restart `python app.py`. Visiting `http://127.0.0.1:5000` will then take you straight to the dashboard.

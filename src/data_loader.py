@@ -1,41 +1,14 @@
 import pandas as pd
-from pathlib import Path
 
 
 def load_data(file_path):
-    """
-    Load the air quality dataset from a CSV file.
-    """
-    df = pd.read_csv(file_path)
-
-    return df
+    return pd.read_csv(file_path)
 
 
-def inspect_data(df):
+def inspect_data(df, verbose=False):
+    if not verbose:
+        print(f"✓ Dataset Loaded: {df.shape[0]:,} rows, {df.shape[1]} columns ({df['City'].nunique()} cities)")
+        return
 
-    print("\n===== DATASET SHAPE =====")
-    print(df.shape)
-
-    print("\n===== COLUMN NAMES =====")
-    print(df.columns.tolist())
-
-    print("\n===== FIRST 5 ROWS =====")
-    print(df.head())
-
-    print("\n===== DATA TYPES =====")
-    print(df.dtypes)
-
-    print("\n===== MISSING VALUES =====")
-    print(df.isnull().sum())
-
-    print("\n===== BASIC STATISTICS =====")
-    print(df.describe())
-
-    print("\n===== DUPLICATE ROWS =====")
-    print(df.duplicated().sum())
-
-    print("\n===== UNIQUE CITIES =====")
-    print(df["City"].nunique())
-
-    print("\n===== CITY COUNTS =====")
-    print(df["City"].value_counts())
+    print(f"Shape: {df.shape} | Cities: {df['City'].unique().tolist()}")
+    print(f"Missing Values: {df.isnull().sum().to_dict()}")

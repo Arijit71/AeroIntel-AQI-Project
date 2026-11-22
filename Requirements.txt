@@ -1,43 +1,13 @@
-Requirements
+# Core Dependencies for AeroIntel AQI Project
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+joblib>=1.3.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+flask>=3.0.0
+streamlit>=1.28.0
+scipy>=1.10.0
+requests>=2.28.0
+python-dotenv>=1.0.0
 
-We can divide the requirements into hardware, software and functional requirements.
-
-1. Hardware Requirements
-Component	Requirement
-Processor	Intel Core i5 or equivalent
-RAM	Minimum 8 GB, 16 GB recommended
-Storage	At least 10 GB free space
-GPU	Not required for basic ML models
-Internet	Required for downloading datasets/libraries
-
-Since we are planning to build this primarily as a Python-based ML project, a dedicated GPU should not be necessary initially.
-
-2. Software Requirements
-Software/Technology	Purpose
-Python	Main programming language
-NumPy	Numerical computation
-Pandas	Data manipulation and preprocessing
-Matplotlib	Data visualization
-Seaborn	Exploratory data analysis
-Scikit-learn	Machine learning
-SciPy	Statistical analysis
-Jupyter Notebook / VS Code	Development and experimentation
-Joblib/Pickle	Saving trained ML models
-
-We can later add other libraries depending on the dataset and models we actually use.
-
-3. Functional Requirements
-
-The system should be able to:
-
-Load and process air-quality datasets.
-Clean and preprocess the collected data.
-Analyze pollutant and environmental variables.
-Perform exploratory data analysis.
-Engineer relevant features.
-Train machine-learning models.
-Evaluate model performance.
-Predict future air-quality conditions.
-Analyze possible pollution contributors.
-Generate an educational health-risk indicator.
-Provide recommendations/protective actions based on predicted conditions.
