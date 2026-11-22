@@ -36,7 +36,7 @@ The application relies on an environment file named `.env` in the root folder of
    WAQI_API_KEY=
    ```
 
-   > Default login is **admin** / **admin123**. `WAQI_API_KEY` is completely optional (the app automatically uses Open-Meteo and regional CPCB baselines if left blank).
+   > Default login is **admin** / **admin123**. `WAQI_API_KEY` is completely optional (get a free key at [aqicn.org/data-platform/token](https://aqicn.org/data-platform/token/); if left blank, the app uses Open-Meteo and regional CPCB baselines).
 
 ---
 
